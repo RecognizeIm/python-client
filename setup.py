@@ -6,5 +6,5 @@ setup(
     author='Micha³ Czy¿ycki',
     packages=['recognizeim'],
     description='Recognize.im Api.',
-    long_description=open('README.txt').read(),
+    long_description=open('README.md').read(),
 )
