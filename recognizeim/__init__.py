@@ -199,7 +199,7 @@ class recognizeApi(object):
     result = self._server.imageGet(image_id)
     return self.convertOutput(result)
 
-  def recognize(self, path):
+  def recognize(self, path, allResults=False): 
     """Sends image recognition request.
 
     :param path: Path to the image file.
@@ -207,7 +207,10 @@ class recognizeApi(object):
     :returns: dict -- the server response.
     """
     
-    url = self.rest + self.client_id
+    if (allResults):
+		url = self.rest + 'allResults/' + self.client_id
+    else:
+		url = self.rest + self.client_id
     
     image = open(path, "rb").read()
     
