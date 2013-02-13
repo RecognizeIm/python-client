@@ -53,6 +53,7 @@ class recognizeApi(object):
   
   wsdl = "http://clapi.itraff.pl/wsdl"
   rest = "http://recognize.im/recognize/"
+  
   Config.cookieJar = ClientCookie.MozillaCookieJar()
 
   def __init__(self, client_id, api_key, clapi_key):
@@ -199,7 +200,25 @@ class recognizeApi(object):
     result = self._server.imageGet(image_id)
     return self.convertOutput(result)
 
-  def recognize(self, path, allResults=False): 
+  def modeGet(self):
+    """Returns recognition mode.
+
+    :returns: dict -- the server response.
+    """
+    
+    result = self._server.modeGet()
+    return self.convertOutput(result)
+
+  def modeChange(self):
+    """Changes recognition mode.
+
+    :returns: dict -- the server response.
+    """
+    
+    result = self._server.modeChange()
+    return self.convertOutput(result)
+
+  def recognize(self, path, allResults=False, multi=False): 
     """Sends image recognition request.
 
     :param path: Path to the image file.
@@ -208,9 +227,11 @@ class recognizeApi(object):
     """
     
     if (allResults):
-		url = self.rest + 'allResults/' + self.client_id
+      url = self.rest + 'allResults/' + self.client_id
+    elif multi:
+      url = self.rest + 'multi/' + self.client_id
     else:
-		url = self.rest + self.client_id
+      url = self.rest + self.client_id
     
     image = open(path, "rb").read()
     
