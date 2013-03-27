@@ -6,6 +6,19 @@ import base64
 import json
 import hashlib
 import ast
+import Image
+
+#limits for query images:
+#for SingleIR
+SINGLEIR_MAX_FILE_SIZE = 500    #KBytes
+SINGLEIR_MIN_DIMENSION = 100    #pix
+SINGLEIR_MIN_IMAGE_AREA = 0.05  #Mpix
+SINGLEIR_MAX_IMAGE_AREA = 0.31  #Mpix
+#for MultipleIR
+MULTIIR_MAX_FILE_SIZE = 3500    #KBytes
+MULTIIR_MIN_DIMENSION = 100     #pix
+MULTIIR_MIN_IMAGE_AREA = 0.1    #Mpix
+MULTIIR_MAX_IMAGE_AREA = 5.1    #Mpix
 
 class CookieTransport(HTTPTransport):
   def call(self, addr, data, namespace, soapaction = None, encoding = None,
@@ -218,7 +231,7 @@ class recognizeApi(object):
     result = self._server.modeChange()
     return self.convertOutput(result)
 
-  def recognize(self, path, allResults=False, multi=False): 
+  def recognize(self, path, getAll=False, multi=False): 
     """Sends image recognition request.
 
     :param path: Path to the image file.
@@ -226,24 +239,49 @@ class recognizeApi(object):
     :returns: dict -- the server response.
     """
     
-    if (allResults):
-      url = self.rest + 'allResults/' + self.client_id
-    elif multi:
-      url = self.rest + 'multi/' + self.client_id
+    #fetch image data
+    size = os.stat(path).st_size / 1024.0 #KB
+    image = Image.open(path)
+    width, height = image.size
+    area = width * height / 10.0**6 #Mpix
+
+    #check image data
+    if (multi):
+      if (size > MULTIIR_MAX_FILE_SIZE or
+          width < MULTIIR_MIN_DIMENSION or
+          height < MULTIIR_MIN_DIMENSION or
+          area < MULTIIR_MIN_IMAGE_AREA or
+          area > MULTIIR_MAX_IMAGE_AREA):
+        return "Image does not meet the requirements of multi mode query image.\n"
     else:
-      url = self.rest + self.client_id
+      if (size > SINGLEIR_MAX_FILE_SIZE or
+          width < SINGLEIR_MIN_DIMENSION or
+          height < SINGLEIR_MIN_DIMENSION or
+          area < SINGLEIR_MIN_IMAGE_AREA or
+          area > SINGLEIR_MAX_IMAGE_AREA):
+        return "Image does not meet the requirements of single mode query image.\n"
+
+    #get url
+    url = self.rest
+    if (multi):
+      url += 'multi/'
+      if (getAll):
+        url += 'allInstances/'
+    elif (getAll):
+        url += 'allResults/'
+    url += self.client_id
     
-    image = open(path, "rb").read()
+    imageData = open(path, "rb").read()
     
     m = hashlib.md5()
     m.update(self.api_key)
-    m.update(image)
+    m.update(imageData)
     md5hash = m.hexdigest()
 
     headers = { 'content-type':'image/jpeg',
                 'x-itraff-hash' : md5hash}
 
-    request = urllib2.Request(url, image, headers)
+    request = urllib2.Request(url, imageData, headers)
     response = urllib2.urlopen(request)
     result = response.read()
 
