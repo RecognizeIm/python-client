@@ -65,7 +65,7 @@ class recognizeApi(object):
   """
   
   wsdl = "http://clapi.itraff.pl/wsdl"
-  rest = "http://recognize.im/recognize/"
+  rest = "http://recognize.im/v2/recognize/"
   
   Config.cookieJar = ClientCookie.MozillaCookieJar()
 
@@ -265,10 +265,10 @@ class recognizeApi(object):
     url = self.rest
     if (multi):
       url += 'multi/'
-      if (getAll):
-        url += 'allInstances/'
-    elif (getAll):
-        url += 'allResults/'
+	else
+	  url += 'single/'
+    if (getAll):
+        url += 'all/'
     url += self.client_id
     
     imageData = open(path, "rb").read()
