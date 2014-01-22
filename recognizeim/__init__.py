@@ -222,13 +222,13 @@ class recognizeApi(object):
     result = self._server.modeGet()
     return self.convertOutput(result)
 
-  def modeChange(self):
+  def modeChange(self, mode):
     """Changes recognition mode.
 
     :returns: dict -- the server response.
     """
     
-    result = self._server.modeChange()
+    result = self._server.modeChange(mode)
     return self.convertOutput(result)
 
   def recognize(self, path, getAll=False, multi=False): 
