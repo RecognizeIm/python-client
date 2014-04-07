@@ -22,6 +22,10 @@ looks like this::
 	#image recognition in multi mode + allInstances
 	result = api.recognize("nasa.jpg", multi=True, getAll=True)
 	
+	#draw frames
+	frames = api.drawFrames("nasa.jpg", result)
+	frames.show()
+	
 	
 Installation
 =========

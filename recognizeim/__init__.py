@@ -7,6 +7,7 @@ import json
 import hashlib
 import ast
 import Image
+import ImageDraw
 
 #limits for query images:
 #for SingleIR
@@ -265,10 +266,10 @@ class recognizeApi(object):
     url = self.rest
     if (multi):
       url += 'multi/'
-	else
-	  url += 'single/'
+    else:
+      url += 'single/'
     if (getAll):
-        url += 'all/'
+      url += 'all/'
     url += self.client_id
     
     imageData = open(path, "rb").read()
@@ -286,3 +287,28 @@ class recognizeApi(object):
     result = response.read()
 
     return ast.literal_eval(result)
+
+  def drawFrames(self, path, result):
+    """Draws frames on image.
+
+    :param path: Path to the image file.
+    :type path: str.
+    :param result: Recognition results.
+    :type result: dict.
+    :returns: Image -- Image with frames.
+    """
+
+    if (result['status'] == 0):
+      image = Image.open(path)
+      draw = ImageDraw.Draw(image)
+      for obj in result['objects']:
+        loc = obj['location']
+        draw.line((loc[0]['x'], loc[0]['y'], loc[1]['x'], loc[1]['y']), fill=(255,0,0,255), width=5)
+        draw.line((loc[1]['x'], loc[1]['y'], loc[2]['x'], loc[2]['y']), fill=(255,0,0,255), width=5)
+        draw.line((loc[2]['x'], loc[2]['y'], loc[3]['x'], loc[3]['y']), fill=(255,0,0,255), width=5)
+        draw.line((loc[3]['x'], loc[3]['y'], loc[0]['x'], loc[0]['y']), fill=(255,0,0,255), width=5)
+      return image
+    else:
+      return None
+    
+    
